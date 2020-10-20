@@ -52,7 +52,7 @@ class AlphaBetaSearch:
         :return: (value, maxaction)
         """
         maxaction = None # prevents reference error
-        if self.cutoff(state, ply): # when ply = 0 it steps into (BUG!)
+        if self.cutoff(state, ply): 
             v = self.strategy.evaluate(state) # get utility
         else:
             v = -1e6
@@ -60,7 +60,7 @@ class AlphaBetaSearch:
             for action in actions:
                 # take minvalue of action and increase the search depth
                 v = max(v, self.minvalue(state.move(action), alpha, beta, ply+1)[0])
-                maxaction = action # unsure
+                maxaction = action
                 if v >= beta:
                     break # prune
                 else:
@@ -86,7 +86,7 @@ class AlphaBetaSearch:
             for action in actions:
                 # take maxvalue of action and increase the search depth
                 v = min(v, self.maxvalue(state.move(action), alpha, beta, ply+1)[0])
-                minaction = action # unsure
+                minaction = action
                 if v <= alpha:
                     break # prune
                 else:
@@ -128,10 +128,7 @@ class Strategy(abstractstrategy.Strategy):
                   (bigger numbers for max player, smaller numbers for
                    min player)
         """
-
         utility = self.piececount(state)
-        # check if can prevent capture (double up pieces)
-        utility += self.buddy(state)
         utility += self.kingme(state)
         return utility
  
@@ -148,7 +145,7 @@ class Strategy(abstractstrategy.Strategy):
         # subtract kings of minplayer from maxplayer
         kingcount = state.get_kingsN()[state.playeridx(self.maxplayer)] - \
                 state.get_kingsN()[state.playeridx(self.minplayer)]
-        return pawncount + (3 * kingcount)
+        return pawncount + (10 * kingcount)
 
     def kingme(self, state):
         """
@@ -158,26 +155,21 @@ class Strategy(abstractstrategy.Strategy):
         """
         utility = 0
         for row, col, piece in state:
-            (player, king) = state.identifypiece(piece)
+            player, king = state.identifypiece(piece)
             if not king:
                 # current piece is maxplayer
                 if player is state.playeridx(self.maxplayer):
-                    # larger distance to king is better in alg (fix)
-                    utility += state.disttoking(piece, row)
+                    if player == 1: # black
+                        utility += row
+                    else: # red
+                        utility += 7 - row
                 # current piece is minplayer
                 else:
-                    utility -= state.disttoking(piece, row)
+                    if player == 1: # black
+                        utility -= row
+                    else: # red
+                        utility -= 7 - row
         return utility
-
-    def buddy(self, state):
-        """
-        buddy - Tell if pieces are next to each other (defensive)
-        :param state: Game state
-        :return: number of pieces next to each other
-        """
-        # check piece location
-        # check diagonals
-        return 0
 
 # Run test cases if invoked as main module
 if __name__ == "__main__":

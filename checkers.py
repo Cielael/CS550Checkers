@@ -1,6 +1,18 @@
 '''
 @author: mroch
 '''
+# File: checkers.py
+# Purpose: runs checkers game and sets ai to use
+# We the udnersigned promise that we have in good faith attempte to follow
+# the principles of pair programming. Although we were free to discuss ideas
+# with others, the implementation is our own. We have shared a common
+# workspace and taken turns at the keyboard for the majority of the work
+# that we are submitting. Furthermore, any non programming portions of the
+# assignment were done independently. We recognize that should this not be
+# the case, we will be subject to penalties as outlined in the course syllabus.
+# Pair Programmer 1: John Robinson, 2020-10-15
+# Pair programmer 2: Jonathan Nguyen, 2020-10-15
+
 
 # Game representation and mechanics
 
@@ -29,11 +41,8 @@ if True:
 
 
 # human - human player, prompts for input    
-from lib import human, checkerboard
-
+from lib import human, checkerboard, boardlibrary
 import ai 
-
-from lib.timer import Timer
 
 # red = human.Strategy
 def Game(red=ai.Strategy, black=tonto.Strategy,
@@ -48,35 +57,49 @@ def Game(red=ai.Strategy, black=tonto.Strategy,
 
     Returns winning player 'r' or 'b'
     """
-    # Get ai.Strategy to work
-    # Log time to perform action
-    # Print board representation if verbose
-    # Output to game.txt
-    
     with open('game.txt','w') as f:
 
         redplayer = red('r', checkerboard.CheckerBoard, maxplies)
         blackplayer = black('b', checkerboard.CheckerBoard, maxplies)
-        board = checkerboard.CheckerBoard()
+        if init == None:
+            board = checkerboard.CheckerBoard()
+        else:
+            board = init
         turncount = 0 # track turn number
     
         while not board.is_terminal()[0]:
             f.write('\nTURN: %d ' %(turncount))
-            if (turncount % 2) == 0: # even turn
-                if verbose:
-                    f.write("It is red\'s turn\n")
-                # want to time each action
-                f.write(str(board)) # turn tuple to string
-                board, action = redplayer.play(board)
-                f.write(board.get_action_str(action) + '\n')
-            else:
-                if verbose:
-                    f.write("It is black\'s turn\n")
-                f.write(str(board)) # turn tuple to string
-                board, action = blackplayer.play(board)
-                f.write(board.get_action_str(action) + '\n')
-            turncount += 1
-    
+            
+            if firstmove == 0: # red goes first
+                if (turncount % 2) == 0: # even turn
+                    if verbose:
+                        f.write("It is red\'s turn\n")
+                    f.write(str(board)) # turn tuple to string
+                    board, action = redplayer.play(board)
+                    f.write(board.get_action_str(action) + '\n')
+                else:
+                    if verbose:
+                        f.write("It is black\'s turn\n")
+                    f.write(str(board)) # turn tuple to string
+                    board, action = blackplayer.play(board)
+                    f.write(board.get_action_str(action) + '\n')
+                turncount += 1
+            
+            else: # black goes first
+                if (turncount % 2) == 0:
+                    if verbose:
+                        f.write("It is black\'s turn\n")
+                    f.write(str(board)) # turn tuple to string
+                    board, action = blackplayer.play(board)
+                    f.write(board.get_action_str(action) + '\n')
+                else:
+                    if verbose:
+                        f.write("It is red\'s turn\n")
+                    f.write(str(board)) # turn tuple to string
+                    board, action = redplayer.play(board)
+                    f.write(board.get_action_str(action) + '\n')
+                turncount += 1
+        
         if board.is_terminal()[0]: # is game over
             winner = board.is_terminal()[1]
             if winner is None:
